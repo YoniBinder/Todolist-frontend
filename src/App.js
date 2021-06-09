@@ -6,7 +6,6 @@ import axios from 'axios'
 
 export default function App() {
     let i=1
-    
     const [modal, setModal] = useState({show:false})
     const [task, setTask] = useState('')
     const [list, setList]= useState([])
@@ -29,18 +28,17 @@ export default function App() {
         let taskChange = e.target.value
         setTask(taskChange)
     }
-
+    // To show Modal
     function toggle(id,process){
-    
-            setModal({
+        
+           setModal({
                 show: !modal.show,
                 TaskID: id,
                 Process:process
-            }
-        );
+            });
     }
 
-
+    // Create new task
     function createTask(task){
         axios.post(`http://localhost:8000/api/task`,
         {done:0,task_name:task})
@@ -52,7 +50,7 @@ export default function App() {
             console.log(error)
         })
     }
-
+    // update an existing task
     function updateTask(task){
         axios.put(`http://localhost:8000/api/tasks/${modal.TaskID}`,
         {done:0,task_name:task})
@@ -65,6 +63,7 @@ export default function App() {
         })
     }
 
+    // delete an existing task
     function deleteTask(){
         axios.delete(`http://localhost:8000/api/tasks/${modal.TaskID}`)
         .then((response)=>{    
@@ -75,7 +74,7 @@ export default function App() {
             console.log(error)
         })
     }
-
+    // add line-through the task as completed
     function done(id){
         let taskDone=0;
         let index=list.findIndex((obj)=>{return obj.id===id})
@@ -94,6 +93,7 @@ export default function App() {
 
     return (
         <div>
+            {/* Task Table  */}
             <table id="todoList">
             <tr>
                 <th >
@@ -103,7 +103,7 @@ export default function App() {
                     <span style={{float:'right',fontSize:"20px",marginTop:"5px",marginRight:"5px"}}>משימות</span>
                 </th>
             </tr>
-            <div style={{width:"300px",height:"300px", overflow:"auto"}}>
+            <div style={{width:"300px",height:"300px", overflowY:"scroll"}}>
             { list.length>0&&list.map((obj)=>
                 <tr >
                     <td key={obj._id} style={{width:"285px"}}>
@@ -144,14 +144,16 @@ export default function App() {
               </td>
             </tr>
             </table>
-            
+
+            {/* Modal  */}
             <MDBModal isOpen={modal.show} toggle={toggle} backdrop={false}>
-            {modal.Process==='create'&&<div style={{textAlign:'right'}}>
+            {modal.Process==='create'&&
+            <div style={{textAlign:'right'}} >
                 <MDBModalHeader>הוספת משימה</MDBModalHeader>
                 <MDBModalBody>
                   
                     <label htmlfor="taskName" > שם המשימה:</label><br/>
-                    <input onChange={changeTaskState} type="text" id="taskName" name="taskName"/>
+                    <input onChange={changeTaskState} type="text" id="taskName" name="taskName" />
                 </MDBModalBody>
                 <MDBModalFooter>
                     <button onClick={()=>createTask(task)} className="btn btn-primary">אישור</button>
@@ -162,7 +164,7 @@ export default function App() {
             }
             {modal.Process==='update'&&<div  style={{textAlign:'right'}}>
                 <MDBModalHeader>עריכת משימה</MDBModalHeader>
-                <MDBModalBody>
+                <MDBModalBody autoFocus={false}>
                     <label htmlfor="taskName">שם המשימה:</label><br/>
                     <input onChange={changeTaskState} type="text" id="taskName" name="taskName" defaultValue={list[list.findIndex((obj)=>{return obj.id===modal.TaskID})].task_name}/>
                 </MDBModalBody>
