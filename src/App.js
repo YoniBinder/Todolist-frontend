@@ -110,7 +110,7 @@ export default function App() {
                 </th>
             </tr>
             </thead>
-            <tbody style={{overflowY:"scroll",width:"300px",display:"block",height:"300px"}}>
+            <tbody style={{overflowY:"scroll",width:"300px",display:"block",height:"320px"}}>
             { list.length>0&&list.map((obj)=>
                 <tr key={obj.id} >
                     <td  style={{width:"285px"}}>
@@ -120,12 +120,7 @@ export default function App() {
                         {obj.done===1?(
                         <span>
                             <button onClick={() => done(obj.id)} style={{float:'right',padding:'8px',borderRadius:'5px',backgroundColor:'grey'}}></button>    
-                        
-                        <span id="done">
-                           
-                            <span style={{fontWeight:"bold",fontSize:"15px"}}>{index++}.</span>
-                            <span>{obj.task_name}</span>
-                        </span>
+                            <span id="done" style={{fontWeight:"bold",fontSize:"15px"}}>{index++}.{obj.task_name}</span>
                         </span>
                             ):(
                         <span>
