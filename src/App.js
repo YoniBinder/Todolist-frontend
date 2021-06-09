@@ -1,14 +1,18 @@
-import { MDBModal, MDBModalBody, MDBModalFooter, MDBModalHeader } from 'mdbreact'
-import { useEffect, useState} from 'react'
+import { useEffect, useState,useRef} from 'react'
+import { Button,Modal } from 'react-bootstrap';
 import './App.css';
 import axios from 'axios'
 
 
 export default function App() {
-    let i=1
-    const [modal, setModal] = useState({show:false})
+    let index=1
     const [task, setTask] = useState('')
     const [list, setList]= useState([])
+    const inputEl = useRef(null);
+    
+    const [show, setShow] = useState({modal:false});
+
+    const handleClose = () => setShow({modal:false});
 
     useEffect(() => {
         getList()
@@ -31,8 +35,8 @@ export default function App() {
     // To show Modal
     function toggle(id,process){
         
-           setModal({
-                show: !modal.show,
+           setShow({
+                modal: true,
                 TaskID: id,
                 Process:process
             });
@@ -44,7 +48,8 @@ export default function App() {
         {done:0,task_name:task})
         .then((response)=>{    
             setList(response.data.data)
-            setModal({show:false})
+            handleClose()
+            // setModal({show:false})
         })
         .catch((error)=>{
             console.log(error)
@@ -52,11 +57,11 @@ export default function App() {
     }
     // update an existing task
     function updateTask(task){
-        axios.put(`http://localhost:8000/api/tasks/${modal.TaskID}`,
+        axios.put(`http://localhost:8000/api/tasks/${show.TaskID}`,
         {done:0,task_name:task})
         .then((response)=>{    
             setList(response.data.data)
-            setModal({show:false})
+            handleClose()
         })
         .catch((error)=>{
             console.log(error)
@@ -65,10 +70,10 @@ export default function App() {
 
     // delete an existing task
     function deleteTask(){
-        axios.delete(`http://localhost:8000/api/tasks/${modal.TaskID}`)
+        axios.delete(`http://localhost:8000/api/tasks/${show.TaskID}`)
         .then((response)=>{    
             setList(response.data.data)
-            setModal({show:false})
+            handleClose()
             })
         .catch((error)=>{
             console.log(error)
@@ -94,19 +99,21 @@ export default function App() {
     return (
         <div>
             {/* Task Table  */}
-            <table id="todoList">
+            <table id="todoList" style={{width:"300px"}}>
+            <thead>
             <tr>
                 <th >
-                    <button onClick={() => toggle(null,'create')} type="button" id="create-border">
+                    <button onClick={()=>toggle(null,'create')} type="button" id="create-border">
                         <span id="create">+</span>
                     </button>
                     <span style={{float:'right',fontSize:"20px",marginTop:"5px",marginRight:"5px"}}>משימות</span>
                 </th>
             </tr>
-            <div style={{width:"300px",height:"300px", overflowY:"scroll"}}>
+            </thead>
+            <tbody style={{overflowY:"scroll",width:"300px",display:"block",height:"300px"}}>
             { list.length>0&&list.map((obj)=>
-                <tr >
-                    <td key={obj._id} style={{width:"285px"}}>
+                <tr key={obj.id} >
+                    <td  style={{width:"285px"}}>
                         
                         <button onClick={() => toggle(obj.id,'destroy')} type="button" id="delete">X</button>
                         
@@ -116,7 +123,7 @@ export default function App() {
                         
                         <span id="done">
                            
-                            <span style={{fontWeight:"bold",fontSize:"15px"}}>{i++}.</span>
+                            <span style={{fontWeight:"bold",fontSize:"15px"}}>{index++}.</span>
                             <span>{obj.task_name}</span>
                         </span>
                         </span>
@@ -125,7 +132,7 @@ export default function App() {
                             <button onClick={() => done(obj.id)} style={{float:'right',padding:'8px',borderRadius:'5px',backgroundColor:'lightgrey'}}></button>    
                         <span id="undone">
                             
-                            <span style={{fontWeight:"bold",fontSize:"15px"}}>{i++}.</span>
+                            <span style={{fontWeight:"bold",fontSize:"15px"}}>{index++}.</span>
                             <span onClick={() => toggle(obj.id,'update')} style={{cursor:'pointer'}}>{obj.task_name}</span>
                         </span>
                         </span>
@@ -135,59 +142,75 @@ export default function App() {
                 </tr>
                 )
             }
-            </div>
-            <tr >
-                <td id="last" style={{textAlign:"center",backgroundColor:"white",padding:"1px",borderBottom:"1px lightgrey solid"}}>
-              <span style={{float:"right",marginRight:"10px"}} > לסיום:<span style={{fontWeight:"bold"}}>{list.filter((obj)=>{return obj.done===0}).length}</span></span>
-              <span> הושלמו:<span style={{fontWeight:"bold"}}>{list.filter((obj)=>{return obj.done===1}).length}</span></span>
-              <span style={{float:"left",marginLeft:"10px"}}> סה"כ:<span style={{fontWeight:"bold"}}>{list.length}</span></span>
-              </td>
-            </tr>
+            </tbody>
+            <tbody >
+                <tr>
+                    <td id="last" style={{height:"5px",textAlign:"center",backgroundColor:"white",padding:"1px",borderBottom:"1px lightgrey solid"}}>
+                        <span style={{float:"right",marginRight:"10px"}} > לסיום:<span style={{fontWeight:"bold"}}>{list.filter((obj)=>{return obj.done===0}).length}</span></span>
+                        <span> הושלמו:<span style={{fontWeight:"bold"}}>{list.filter((obj)=>{return obj.done===1}).length}</span></span>
+                        <span style={{float:"left",marginLeft:"10px"}}> סה"כ:<span style={{fontWeight:"bold"}}>{list.length}</span></span>
+                    </td>
+                </tr>
+            </tbody>
+            
             </table>
 
+
             {/* Modal  */}
-            <MDBModal isOpen={modal.show} toggle={toggle} backdrop={false}>
-            {modal.Process==='create'&&
-            <div style={{textAlign:'right'}} >
-                <MDBModalHeader>הוספת משימה</MDBModalHeader>
-                <MDBModalBody>
-                  
-                    <label htmlfor="taskName" > שם המשימה:</label><br/>
-                    <input onChange={changeTaskState} type="text" id="taskName" name="taskName" />
-                </MDBModalBody>
-                <MDBModalFooter>
-                    <button onClick={()=>createTask(task)} className="btn btn-primary">אישור</button>
-                    <button className="btn btn-secondary" onClick={toggle}>ביטול</button>
-                    
-                </MDBModalFooter>
-                </div>
-            }
-            {modal.Process==='update'&&<div  style={{textAlign:'right'}}>
-                <MDBModalHeader>עריכת משימה</MDBModalHeader>
-                <MDBModalBody autoFocus={false}>
-                    <label htmlfor="taskName">שם המשימה:</label><br/>
-                    <input onChange={changeTaskState} type="text" id="taskName" name="taskName" defaultValue={list[list.findIndex((obj)=>{return obj.id===modal.TaskID})].task_name}/>
-                </MDBModalBody>
-                <MDBModalFooter>
-                  <button onClick={()=>updateTask(task)} className="btn btn-primary">אישור</button>
-                  <button className="btn btn-secondary" onClick={toggle}>ביטול</button>
-                  
-                </MDBModalFooter>
-                </div>
-            }   
-            {modal.Process==='destroy'&&<div  style={{textAlign:'right'}} >
-                <MDBModalHeader>מחיקת משימה</MDBModalHeader>
-                <MDBModalBody>
+             <Modal backdrop={false} style={{textAlign:'right'}} show={show.modal}  >
+             {show.Process==='create'&& <div> 
+                <Modal.Header onEntered={()=>inputEl.current.focus()}>
+                <Modal.Title>הוספת משימה</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                <label htmlFor="taskName">שם המשימה:</label><br/>
+                <input ref={inputEl} onChange={changeTaskState} type="text" id="taskName" name="taskName" />
+                </Modal.Body>
+                <Modal.Footer>
+                <Button variant="primary" onClick={()=>createTask(task)}>
+                    אישור
+                </Button>
+                <Button variant="secondary" onClick={handleClose}>
+                    ביטול
+                </Button>
+                </Modal.Footer>
+                </div>  }
+                {show.Process==='update'&& <div> 
+                <Modal.Header onEntered={()=>inputEl.current.focus()}>
+                <Modal.Title>עריכת משימה</Modal.Title>
+                </Modal.Header >
+                <Modal.Body>
+                <label htmlFor="taskName">שם המשימה:</label><br/>
+                <input ref={inputEl} onChange={changeTaskState} type="text" id="taskName" name="taskName" defaultValue={list[list.findIndex((obj)=>{return obj.id===show.TaskID})].task_name} />
+                </Modal.Body>
+                <Modal.Footer>
+                <Button variant="primary" onClick={()=>updateTask(task)}>
+                    אישור
+                </Button>
+                <Button variant="secondary" onClick={handleClose}>
+                    ביטול
+                </Button>
+                </Modal.Footer>
+                </div>  }
+                {show.Process==='destroy'&& <div> 
+                <Modal.Header>
+                <Modal.Title>מחיקת משימה</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
                 האם למחוק את המשימה?
-                </MDBModalBody>
-                <MDBModalFooter>
-                <button onClick={deleteTask} className="btn btn-primary">כן</button>
-                  <button className="btn btn-secondary" onClick={toggle}>לא</button>
-                 
-                </MDBModalFooter>
-                </div>
-            }
-            </MDBModal>
-        </div>
+                </Modal.Body>
+                <Modal.Footer>
+                <Button variant="primary" onClick={deleteTask(task)}>
+                    אישור
+                </Button>
+                <Button variant="secondary" onClick={handleClose}>
+                    ביטול
+                </Button>
+                </Modal.Footer>
+                </div>  }
+
+            </Modal>
+            </div>
     )
+         
 }

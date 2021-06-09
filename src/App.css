@@ -10,6 +10,7 @@
 #todoList td{
   border-bottom: 1px solid black;
   padding: 8px;
+  height: 10px;
 }
 
 #todoList tr:nth-child(even){background-color: white;}
