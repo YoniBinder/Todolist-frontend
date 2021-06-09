@@ -152,9 +152,9 @@ export default function App() {
 
 
             {/* Modal  */}
-             <Modal backdrop={false} style={{textAlign:'right'}} show={show.modal}  >
-             {show.Process==='create'&& <div> 
-                <Modal.Header onEntered={()=>inputEl.current.focus()}>
+             <Modal backdrop={false} style={{textAlign:'right'}} show={show.modal} onEntered={()=> inputEl.current.focus()}>
+             {show.Process==='create'&& <div > 
+                <Modal.Header >
                 <Modal.Title>הוספת משימה</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -171,7 +171,7 @@ export default function App() {
                 </Modal.Footer>
                 </div>  }
                 {show.Process==='update'&& <div> 
-                <Modal.Header onEntered={()=>inputEl.current.focus()}>
+                <Modal.Header >
                 <Modal.Title>עריכת משימה</Modal.Title>
                 </Modal.Header >
                 <Modal.Body>
@@ -188,14 +188,15 @@ export default function App() {
                 </Modal.Footer>
                 </div>  }
                 {show.Process==='destroy'&& <div> 
-                <Modal.Header>
-                <Modal.Title>מחיקת משימה</Modal.Title>
+                <Modal.Header >
+                <Modal.Title >מחיקת משימה</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                 האם למחוק את המשימה?
+                <span ref={inputEl}></span>
                 </Modal.Body>
-                <Modal.Footer>
-                <Button variant="primary" onClick={deleteTask(task)}>
+                <Modal.Footer >
+                <Button variant="primary" onClick={()=>deleteTask(task)} >
                     אישור
                 </Button>
                 <Button variant="secondary" onClick={handleClose}>
